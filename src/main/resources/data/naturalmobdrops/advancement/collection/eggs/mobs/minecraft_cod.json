@@ -1,0 +1,36 @@
+{
+  "parent": "naturalmobdrops:collection/eggs/groups/ocean_fish",
+  "display": {
+    "icon": {
+      "id": "minecraft:cod_spawn_egg"
+    },
+    "title": {
+      "text": " "
+    },
+    "description": {
+      "text": " "
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "x": -3.5,
+    "y": 7.0
+  },
+  "criteria": {
+    "collected": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:cod_spawn_egg"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "collected"
+    ]
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "parent": "naturalmobdrops:collection/heads/groups/tameable_animals",
+  "display": {
+    "icon": {
+      "id": "minecraft:ocelot_spawn_egg"
+    },
+    "title": {
+      "text": " "
+    },
+    "description": {
+      "text": " "
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "x": 0.5,
+    "y": 13.0
+  },
+  "criteria": {
+    "collected": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:player_head",
+            "components": {
+              "naturalmobdrops:mob_head_note_source": "minecraft:ocelot"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "collected"
+    ]
+  ]
+}

@@ -1,0 +1,17 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "net.berkle.naturalmobdrops.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"EnderDragonMixin",
+		"EnderDragonFightAccessor",
+		"EnderDragonFightMixin",
+		"ItemEntityMixin",
+		"SpawnerBlockMixin",
+		"SkullBlockEntityMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

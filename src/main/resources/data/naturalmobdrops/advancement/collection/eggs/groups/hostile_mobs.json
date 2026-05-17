@@ -1,0 +1,29 @@
+{
+  "parent": "naturalmobdrops:collection/eggs/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:zombie_head"
+    },
+    "title": {
+      "translate": "advancements.naturalmobdrops.collection.group.hostile_mobs"
+    },
+    "description": {
+      "text": " "
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "x": -2.0,
+    "y": 14.0
+  },
+  "criteria": {
+    "code_grant": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "requirements": [
+    [
+      "code_grant"
+    ]
+  ]
+}

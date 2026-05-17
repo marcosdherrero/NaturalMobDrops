@@ -1,0 +1,30 @@
+package net.berkle.naturalmobdrops.mixin;
+
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import com.llamalad7.mixinextras.sugar.Local;
+
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+
+import net.berkle.naturalmobdrops.advancement.CollectionAdvancementTracker;
+
+@Mixin(ItemEntity.class)
+abstract class ItemEntityMixin {
+
+	@Inject(
+			method = "playerTouch",
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/world/entity/player/Player;take(Lnet/minecraft/world/entity/Entity;I)V"))
+	private void naturalmobdrops$trackCollectionPickup(Player player, CallbackInfo ci, @Local ItemStack stack) {
+		if (player instanceof ServerPlayer serverPlayer) {
+			CollectionAdvancementTracker.tryGrantFromStack(serverPlayer, stack);
+		}
+	}
+}

@@ -1,0 +1,36 @@
+{
+  "parent": "naturalmobdrops:collection/heads/groups/hostile_mobs",
+  "display": {
+    "icon": {
+      "id": "minecraft:piglin_head"
+    },
+    "title": {
+      "text": " "
+    },
+    "description": {
+      "text": " "
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "x": 2.5,
+    "y": 21.0
+  },
+  "criteria": {
+    "collected": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:piglin_head"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "collected"
+    ]
+  ]
+}

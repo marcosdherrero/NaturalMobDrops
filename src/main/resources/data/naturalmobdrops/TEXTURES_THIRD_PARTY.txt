@@ -1,0 +1,11 @@
+Mob head skin Base64 values in builtin_mob_head_textures.json are derived from the
+MoreMobHeads project by JoelGodOfwar (MIT License).
+Source: https://github.com/JoelGodOfwar/MoreMobHeads
+
+Per-wool sheep heads in builtin_sheep_head_textures.json use the same project's
+heads/entity/sheep.json texture values (MIT License).
+
+Per-variant mob heads in builtin_variant_mob_heads.json use texture values from the following
+heads/entity/*.json files in that repository (MIT License): horse.json, axolotl.json, chicken.json,
+pig.json, cow.json, cat.json, wolf.json, panda.json, frog.json, fox.json, rabbit.json, parrot.json,
+mooshroom.json, salmon.json, tropical_fish.json, llama.json, trader_llama.json, and zombie_villager.json.

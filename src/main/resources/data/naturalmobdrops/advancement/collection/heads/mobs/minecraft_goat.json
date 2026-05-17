@@ -1,0 +1,39 @@
+{
+  "parent": "naturalmobdrops:collection/heads/groups/farm_animals",
+  "display": {
+    "icon": {
+      "id": "minecraft:goat_spawn_egg"
+    },
+    "title": {
+      "text": " "
+    },
+    "description": {
+      "text": " "
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "x": 3.5,
+    "y": 3.0
+  },
+  "criteria": {
+    "collected": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:player_head",
+            "components": {
+              "naturalmobdrops:mob_head_note_source": "minecraft:goat"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "collected"
+    ]
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "parent": "naturalmobdrops:collection/eggs/groups/hostile_mobs",
+  "display": {
+    "icon": {
+      "id": "minecraft:strider_spawn_egg"
+    },
+    "title": {
+      "text": " "
+    },
+    "description": {
+      "text": " "
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "x": -3.5,
+    "y": 25.0
+  },
+  "criteria": {
+    "collected": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:strider_spawn_egg"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "collected"
+    ]
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "parent": "naturalmobdrops:collection/heads/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:lead"
+    },
+    "title": {
+      "translate": "advancements.naturalmobdrops.collection.group.tameable_animals"
+    },
+    "description": {
+      "text": " "
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "x": 2.0,
+    "y": 10.0
+  },
+  "criteria": {
+    "code_grant": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "requirements": [
+    [
+      "code_grant"
+    ]
+  ]
+}

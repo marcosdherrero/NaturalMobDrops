@@ -1,0 +1,27 @@
+{
+  "display": {
+    "background": "minecraft:gui/advancements/backgrounds/adventure",
+    "icon": {
+      "id": "minecraft:bat_spawn_egg"
+    },
+    "title": {
+      "translate": "advancements.naturalmobdrops.collection.root.title"
+    },
+    "description": {
+      "translate": "advancements.naturalmobdrops.collection.root.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "code_grant": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "requirements": [
+    [
+      "code_grant"
+    ]
+  ]
+}

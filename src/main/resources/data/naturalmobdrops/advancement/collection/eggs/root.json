@@ -1,0 +1,29 @@
+{
+  "parent": "naturalmobdrops:collection/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:turtle_spawn_egg"
+    },
+    "title": {
+      "text": " "
+    },
+    "description": {
+      "text": " "
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "x": -2.0,
+    "y": 0.0
+  },
+  "criteria": {
+    "code_grant": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "requirements": [
+    [
+      "code_grant"
+    ]
+  ]
+}

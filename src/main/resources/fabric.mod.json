@@ -1,0 +1,31 @@
+{
+	"schemaVersion": 1,
+	"id": "naturalmobdrops",
+	"version": "${version}",
+	"name": "Natural Mob Drops",
+	"description": "Natural spawn-egg and mob-head drops on player kills, with optional silk-touch spawner drops. Targets Minecraft Java 26.1.2.",
+	"authors": [
+		"Berkle"
+	],
+	"license": "CC0-1.0",
+	"icon": "assets/naturalmobdrops/icon.png",
+	"environment": "*",
+	"accessWidener": "naturalmobdrops.accesswidener",
+	"mixins": [
+		"naturalmobdrops.mixins.json"
+	],
+	"entrypoints": {
+		"main": [
+			"net.berkle.naturalmobdrops.NaturalMobDropsMain"
+		],
+		"client": [
+			"net.berkle.naturalmobdrops.client.NaturalMobDropsClient"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.2",
+		"minecraft": "~26.1.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
