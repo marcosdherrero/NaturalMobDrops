@@ -14,7 +14,7 @@ Fabric mod for **Minecraft Java 26.1.2** — natural spawn-egg and mob-head drop
 ./gradlew build
 ```
 
-Output JAR: `build/libs/naturalmobdrops-1.0.0.jar`
+Output JAR: `build/libs/naturalmobdrops-1.0.0-Minecraft26.1.2.jar`
 
 ## In-game
 

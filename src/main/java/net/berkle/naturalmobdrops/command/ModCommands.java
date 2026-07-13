@@ -21,6 +21,7 @@ public final class ModCommands {
 		dispatcher.register(
 			Commands.literal(NaturalMobDropsMain.COMMAND_ROOT)
 				.then(HelpCommand.helpRoot())
+				.then(ChangeDropRateCommand.root(registryAccess))
 				.then(EggRateCommand.eggsRoot(registryAccess))
 				.then(HeadRateCommand.headsRoot(registryAccess))
 				.then(SpawnerCommand.spawnerRoot())

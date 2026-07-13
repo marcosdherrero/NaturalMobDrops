@@ -28,12 +28,16 @@ import net.berkle.naturalmobdrops.egg.SpawnEggItems;
 import net.berkle.naturalmobdrops.head.MobHeadItems;
 
 /**
- * Per-world egg rates, head rates, silk spawners, optional XP-level bonus on rolls, player victim heads, and Ender Dragon
- * podium rewards. Stored on the overworld so commands and gameplay in any dimension use the same settings.
+ * Per-world egg rates, head rates, per-item vanilla loot multipliers, silk spawners, optional XP-level bonus on rolls,
+ * player victim heads, and Ender Dragon podium rewards. Stored on the overworld so commands and gameplay in any
+ * dimension use the same settings.
  */
 public class NaturalDropSavedData extends SavedData {
 
 	public static final Identifier DATA_ID = Identifier.fromNamespaceAndPath("naturalmobdrops", "natural_drops");
+
+	private static final Codec<Map<Identifier, Integer>> ITEM_RATE_MAP_CODEC =
+		Codec.unboundedMap(Identifier.CODEC, Codec.INT);
 
 	public static final Codec<NaturalDropSavedData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.BOOL.optionalFieldOf("SilkSpawners", true).forGetter(NaturalDropSavedData::isSilkSpawners),
@@ -43,7 +47,8 @@ public class NaturalDropSavedData extends SavedData {
 		Codec.BOOL.optionalFieldOf("DragonDropsNewEgg", false).forGetter(NaturalDropSavedData::isDragonDropsNewEgg),
 		Codec.BOOL.optionalFieldOf("DragonDropsHeads", false).forGetter(NaturalDropSavedData::isDragonDropsHeads),
 		Codec.unboundedMap(Identifier.CODEC, Codec.INT).optionalFieldOf("EggRates", Map.of()).forGetter(NaturalDropSavedData::eggRatesAsMap),
-		Codec.unboundedMap(Identifier.CODEC, Codec.INT).optionalFieldOf("HeadRates", Map.of()).forGetter(NaturalDropSavedData::headRatesAsMap)
+		Codec.unboundedMap(Identifier.CODEC, Codec.INT).optionalFieldOf("HeadRates", Map.of()).forGetter(NaturalDropSavedData::headRatesAsMap),
+		Codec.unboundedMap(Identifier.CODEC, ITEM_RATE_MAP_CODEC).optionalFieldOf("LootItemRates", Map.of()).forGetter(NaturalDropSavedData::lootItemRatesAsMap)
 	).apply(instance, NaturalDropSavedData::fromCodec));
 
 	public static final SavedDataType<NaturalDropSavedData> TYPE = new SavedDataType<>(
@@ -61,6 +66,8 @@ public class NaturalDropSavedData extends SavedData {
 	private boolean dragonDropsHeads;
 	private final Object2IntOpenHashMap<Identifier> eggRates = new Object2IntOpenHashMap<>();
 	private final Object2IntOpenHashMap<Identifier> headRates = new Object2IntOpenHashMap<>();
+	/** Per mob → per item quantity multipliers (0–5). Absent means natural (1×). */
+	private final Map<Identifier, Object2IntOpenHashMap<Identifier>> lootItemRates = new HashMap<>();
 
 	public NaturalDropSavedData() {
 		this.silkSpawners = true;
@@ -81,7 +88,8 @@ public class NaturalDropSavedData extends SavedData {
 		boolean dragonDropsNewEgg,
 		boolean dragonDropsHeads,
 		Object2IntOpenHashMap<Identifier> eggRates,
-		Object2IntOpenHashMap<Identifier> headRates
+		Object2IntOpenHashMap<Identifier> headRates,
+		Map<Identifier, Object2IntOpenHashMap<Identifier>> lootItemRates
 	) {
 		this.silkSpawners = silkSpawners;
 		this.playerHeadDrops = playerHeadDrops;
@@ -91,6 +99,11 @@ public class NaturalDropSavedData extends SavedData {
 		this.dragonDropsHeads = dragonDropsHeads;
 		this.eggRates.putAll(eggRates);
 		this.headRates.putAll(headRates);
+		for (var e : lootItemRates.entrySet()) {
+			Object2IntOpenHashMap<Identifier> copy = new Object2IntOpenHashMap<>();
+			copy.putAll(e.getValue());
+			this.lootItemRates.put(e.getKey(), copy);
+		}
 	}
 
 	private static NaturalDropSavedData fromCodec(
@@ -101,14 +114,41 @@ public class NaturalDropSavedData extends SavedData {
 		boolean dragonDropsNewEgg,
 		boolean dragonDropsHeads,
 		Map<Identifier, Integer> eggFromDisk,
-		Map<Identifier, Integer> headFromDisk
+		Map<Identifier, Integer> headFromDisk,
+		Map<Identifier, Map<Identifier, Integer>> lootItemFromDisk
 	) {
 		Object2IntOpenHashMap<Identifier> eggs = new Object2IntOpenHashMap<>();
 		eggFromDisk.forEach((id, rate) -> eggs.put(id, rate.intValue()));
 		Object2IntOpenHashMap<Identifier> heads = new Object2IntOpenHashMap<>();
 		headFromDisk.forEach((id, rate) -> heads.put(id, rate.intValue()));
-
+		Map<Identifier, Object2IntOpenHashMap<Identifier>> lootItems = new HashMap<>();
 		boolean dirty = false;
+		for (var entityEntry : lootItemFromDisk.entrySet()) {
+			Identifier entityId = entityEntry.getKey();
+			if (BuiltInRegistries.ENTITY_TYPE.get(entityId).isEmpty()
+				|| ModConstants.PLAYER_ENTITY_TYPE_ID.equals(entityId)) {
+				dirty = true;
+				continue;
+			}
+			Object2IntOpenHashMap<Identifier> itemMap = new Object2IntOpenHashMap<>();
+			for (var itemEntry : entityEntry.getValue().entrySet()) {
+				Identifier itemId = itemEntry.getKey();
+				if (BuiltInRegistries.ITEM.get(itemId).isEmpty()) {
+					dirty = true;
+					continue;
+				}
+				int m = clampLootMultiplier(itemEntry.getValue().intValue());
+				if (m == 1) {
+					dirty = true;
+					continue;
+				}
+				itemMap.put(itemId, m);
+			}
+			if (!itemMap.isEmpty()) {
+				lootItems.put(entityId, itemMap);
+			}
+		}
+
 		if (eggs.isEmpty()) {
 			EggRateDefaults.applyDefaults(eggs);
 			dirty = true;
@@ -152,7 +192,8 @@ public class NaturalDropSavedData extends SavedData {
 			dragonDropsNewEgg,
 			dragonDropsHeads,
 			eggs,
-			heads
+			heads,
+			lootItems
 		);
 		if (dirty) {
 			out.setDirty(true);
@@ -194,12 +235,24 @@ public class NaturalDropSavedData extends SavedData {
 		return copyMap(headRates);
 	}
 
+	private Map<Identifier, Map<Identifier, Integer>> lootItemRatesAsMap() {
+		Map<Identifier, Map<Identifier, Integer>> out = new HashMap<>();
+		for (var e : lootItemRates.entrySet()) {
+			out.put(e.getKey(), copyMap(e.getValue()));
+		}
+		return out;
+	}
+
 	private static Map<Identifier, Integer> copyMap(Object2IntOpenHashMap<Identifier> src) {
 		Map<Identifier, Integer> out = new HashMap<>();
 		for (var e : src.object2IntEntrySet()) {
 			out.put(e.getKey(), e.getIntValue());
 		}
 		return out;
+	}
+
+	private static int clampLootMultiplier(int value) {
+		return Math.max(0, Math.min(ModConstants.DROP_RATE_MULTIPLIER_MAX, value));
 	}
 
 	/** World-wide config (overworld saved data); safe to call with any {@link ServerLevel} on the server. */
@@ -357,12 +410,44 @@ public class NaturalDropSavedData extends SavedData {
 		return count;
 	}
 
+	/**
+	 * Quantity multiplier for one item from this mob’s vanilla death loot table.
+	 * {@code 1} = natural (default when unset), {@code 0} = skip that item, up to {@link ModConstants#DROP_RATE_MULTIPLIER_MAX}.
+	 */
+	public int getLootItemMultiplier(Identifier entityId, Identifier itemId) {
+		Object2IntOpenHashMap<Identifier> items = lootItemRates.get(entityId);
+		if (items == null || !items.containsKey(itemId)) {
+			return 1;
+		}
+		return items.getInt(itemId);
+	}
+
+	public void setLootItemMultiplier(Identifier entityId, Identifier itemId, int multiplier) {
+		int m = clampLootMultiplier(multiplier);
+		if (m == 1) {
+			Object2IntOpenHashMap<Identifier> items = lootItemRates.get(entityId);
+			if (items != null) {
+				items.removeInt(itemId);
+				if (items.isEmpty()) {
+					lootItemRates.remove(entityId);
+				}
+			}
+		} else {
+			lootItemRates.computeIfAbsent(entityId, id -> new Object2IntOpenHashMap<>()).put(itemId, m);
+		}
+		setDirty(true);
+	}
+
 	/** One mob whose stored egg permille differs from the category base. */
 	public record EggRateOverrideLine(Identifier entityTypeId, int storedPermille, int basePermille) {
 	}
 
 	/** One mob whose stored head permille differs from the category base. */
 	public record HeadRateOverrideLine(Identifier entityTypeId, int storedPermille, int basePermille) {
+	}
+
+	/** One mob+item whose vanilla loot multiplier differs from natural (1×). */
+	public record LootRateOverrideLine(Identifier entityTypeId, Identifier itemId, int multiplier) {
 	}
 
 	public List<EggRateOverrideLine> collectEggRateOverrides() {
@@ -401,6 +486,26 @@ public class NaturalDropSavedData extends SavedData {
 			}
 		}
 		out.sort(Comparator.comparing(l -> l.entityTypeId().toString()));
+		return out;
+	}
+
+	public List<LootRateOverrideLine> collectLootRateOverrides() {
+		List<LootRateOverrideLine> out = new ArrayList<>();
+		for (var entityEntry : lootItemRates.entrySet()) {
+			Identifier entityId = entityEntry.getKey();
+			if (ModConstants.PLAYER_ENTITY_TYPE_ID.equals(entityId)) {
+				continue;
+			}
+			for (var itemEntry : entityEntry.getValue().object2IntEntrySet()) {
+				int multiplier = itemEntry.getIntValue();
+				if (multiplier != 1) {
+					out.add(new LootRateOverrideLine(entityId, itemEntry.getKey(), multiplier));
+				}
+			}
+		}
+		out.sort(Comparator
+			.comparing((LootRateOverrideLine l) -> l.entityTypeId().toString())
+			.thenComparing(l -> l.itemId().toString()));
 		return out;
 	}
 }

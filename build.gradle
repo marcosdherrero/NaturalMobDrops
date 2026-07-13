@@ -54,12 +54,18 @@ java {
 }
 
 jar {
+	archiveFileName = "${mod_name}-${mod_version}-Minecraft${minecraft_version}.jar"
+
 	def projectName = project.name
 	inputs.property "projectName", projectName
 
 	from("LICENSE") {
 		rename { "${it}_$projectName" }
 	}
+}
+
+sourcesJar {
+	archiveFileName = "${mod_name}-${mod_version}-Minecraft${minecraft_version}-sources.jar"
 }
 
 publishing {

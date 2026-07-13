@@ -56,7 +56,8 @@ public final class HelpCommand {
 			+ "Bosses: ender dragon, wither, warden, elder guardian. Heads use the same tiers then scale ~10× rarer, "
 			+ "except vanilla block skulls that normally need a charged creeper (zombie family, creeper, skeleton family, wither skeleton, piglin family): those default to 0‰ so you still use vanilla; raise with heads change_rate if you want drops on kill.\n"
 			+ "/" + root + " help about — this text\n"
-			+ "/" + root + " help status — egg/head overrides, spawner, toggles, dragon drops\n"
+			+ "/" + root + " help status — egg/head/loot-item overrides, spawner, toggles, dragon drops\n"
+			+ "/" + root + " change_drop_rate <mob> <egg|head|<item>> <0-5> — egg/head: N× natural chance; <item>: N× that item from vanilla death loot (0 = none, 1 = natural)\n"
 			+ "/" + root + " eggs change_rate reset — reset all egg rates to bases\n"
 			+ "/" + root + " eggs change_rate <0-1000> — set egg permille for every spawn-egg mob type\n"
 			+ "/" + root + " eggs change_rate group <farm_animals|ocean_fish|tameable_animals|hostile_mobs|boss_mobs> reset — reset that group\n"
@@ -97,6 +98,9 @@ public final class HelpCommand {
 		root.append(Component.literal("\n"));
 		root.append(sectionHeader("Head rates"));
 		appendHeadRatesBody(root, data);
+		root.append(Component.literal("\n"));
+		root.append(sectionHeader("Loot item rates (vanilla death loot)"));
+		appendLootRatesBody(root, data);
 		root.append(Component.literal("\n"));
 		root.append(sectionHeader("World toggles (all dimensions)"));
 		appendToggleBody(root, data);
@@ -139,6 +143,20 @@ public final class HelpCommand {
 		}
 	}
 
+	private static void appendLootRatesBody(MutableComponent root, NaturalDropSavedData data) {
+		var overrides = data.collectLootRateOverrides();
+		if (overrides.isEmpty()) {
+			root.append(Component.literal("All match natural (1×).").withStyle(STYLE_MUTED));
+			return;
+		}
+		for (int i = 0; i < overrides.size(); i++) {
+			if (i > 0) {
+				root.append(Component.literal("\n"));
+			}
+			root.append(formatLootOverrideLine(overrides.get(i)));
+		}
+	}
+
 	private static void appendToggleBody(MutableComponent root, NaturalDropSavedData data) {
 		root.append(toggleLine("Player victim heads (no roll): ", data.isPlayerHeadDrops()));
 		root.append(Component.literal("\n"));
@@ -174,6 +192,17 @@ public final class HelpCommand {
 		lineOut.append(Component.literal("‰ (base ").withStyle(STYLE_MUTED));
 		lineOut.append(numberComponent(line.basePermille()));
 		lineOut.append(Component.literal("‰)").withStyle(STYLE_MUTED));
+		return lineOut;
+	}
+
+	private static MutableComponent formatLootOverrideLine(NaturalDropSavedData.LootRateOverrideLine line) {
+		MutableComponent lineOut = Component.empty();
+		lineOut.append(Component.literal(line.entityTypeId().toString()).withStyle(STYLE_MOB_ID));
+		lineOut.append(Component.literal(" ").withStyle(STYLE_MUTED));
+		lineOut.append(Component.literal(line.itemId().toString()).withStyle(STYLE_MOB_ID));
+		lineOut.append(Component.literal(" → ").withStyle(STYLE_MUTED));
+		lineOut.append(numberComponent(line.multiplier()));
+		lineOut.append(Component.literal("×").withStyle(STYLE_MUTED));
 		return lineOut;
 	}
 
