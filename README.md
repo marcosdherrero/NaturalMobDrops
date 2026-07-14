@@ -1,3 +1,7 @@
+<p align="center">
+  <img alt="Natural Mob Drops mod icon" width="128" src="imgs/icon.png" />
+</p>
+
 # Natural Mob Drops
 
 Fabric mod for **Minecraft Java 26.1.2** — natural spawn-egg and mob-head drops on player-credited kills, optional silk-touch spawner drops, and configurable Ender Dragon podium rewards.
